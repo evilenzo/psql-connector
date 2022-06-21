@@ -36,11 +36,11 @@ func getConfig() (postgresConfig, error) {
 
 func createConnection(config postgresConfig) (*gorm.DB, error) {
 	dsn := "" +
-		"host=%[0]v " +
-		"port=%[1]v " +
-		"user=%[2]v " +
-		"password=%[3]v " +
-		"dbname=%[4]v " +
+		"host=%[1]v " +
+		"port=%[2]v " +
+		"user=%[3]v " +
+		"password=%[4]v " +
+		"dbname=%[5]v " +
 		"sslmode=disable"
 
 	dsn = fmt.Sprintf(dsn,
