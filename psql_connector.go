@@ -24,7 +24,7 @@ type postgresConfig struct {
 }
 
 func createPostgresConfig() postgresConfig {
-	pc := postgresConfig{Host: "localhost", Port: 5432}
+	pc := postgresConfig{Host: "postgres", Port: 5432}
 	return pc
 }
 
