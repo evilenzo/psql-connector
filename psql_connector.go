@@ -1,4 +1,4 @@
-package psql-connector
+package psql_connector
 
 import (
 	"fmt"
