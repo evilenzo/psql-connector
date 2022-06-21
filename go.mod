@@ -1,4 +1,4 @@
-module psql_connector
+module psql-connector
 
 go 1.18
 
