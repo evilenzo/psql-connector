@@ -1,4 +1,4 @@
-module psql-connector
+module github.com/evilenzo/psql-connector
 
 go 1.18
 
