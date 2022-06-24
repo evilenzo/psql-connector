@@ -1,26 +1,22 @@
 package psql_connector
 
 import (
+	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/codingconcepts/env"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	log "github.com/sirupsen/logrus"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
 )
 
-func check(err error) {
-	if err != nil {
-		log.Fatalf("Fatal error during connecting to DB: %v", err)
-	}
-}
-
 type postgresConfig struct {
-	Host     string `env:"POSTGRES_HOST"`
-	Port     int16  `env:"POSTGRES_PORT"`
 	User     string `env:"POSTGRES_USER" required:"true"`
 	Password string `env:"POSTGRES_PASSWORD" required:"true"`
-	DBname   string `env:"POSTGRES_DB" required:"true"`
+	Host     string `env:"POSTGRES_HOST"`
+	Port     int16  `env:"POSTGRES_PORT"`
+	DB       string `env:"POSTGRES_DB" required:"true"`
 }
 
 func createPostgresConfig() postgresConfig {
@@ -34,31 +30,25 @@ func getConfig() (postgresConfig, error) {
 	return config, err
 }
 
-func createConnection(config postgresConfig) (*gorm.DB, error) {
-	dsn := "" +
-		"host=%[1]v " +
-		"port=%[2]v " +
-		"user=%[3]v " +
-		"password=%[4]v " +
-		"dbname=%[5]v " +
-		"sslmode=disable"
+func createConnection(config postgresConfig) *bun.DB {
+	dsn := fmt.Sprintf("postgres://%[1]v:%[2]v@%[3]v:%[4]v/%[5]v?sslmode=disable",
+		config.User,     // 1
+		config.Password, // 2
+		config.Host,     // 3
+		config.Port,     // 4
+		config.DB)       // 5
 
-	dsn = fmt.Sprintf(dsn,
-		config.Host,     // 0
-		config.Port,     // 1
-		config.User,     // 2
-		config.Password, // 3
-		config.DBname)   // 4
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	return db, err
+	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
+	db := bun.NewDB(sqldb, pgdialect.New())
+	return db
 }
 
-func ConnectFromEnv() *gorm.DB {
+func ConnectFromEnv() *bun.DB {
 	config, err := getConfig()
-	check(err)
+	if err != nil {
+		log.Error("Error during getting env config: ", err)
+	}
 
-	db, err := createConnection(config)
-	check(err)
+	db := createConnection(config)
 	return db
 }
